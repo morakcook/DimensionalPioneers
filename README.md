@@ -31,3 +31,11 @@
 - **학습 여부**: 학습 과정 없음.
 - **오픈소스 도구 예시**: Blender 또는 MeshLab과 같은 3D 모델링 및 시각화 소프트웨어를 사용해 최종 3D 모델을 확인할 수 있습니다.
 
+## 사용하는 모델 소스 예제 사이트
+
+### 1. **MiDaS** (Multi-scale Deep Stereo Matching System)
+- https://pytorch.org/hub/intelisl_midas_v2/
+### 2. **Neural Radiance Fields (NeRF)**
+-
+### 3. **Pix2Pix**
+- 
