@@ -36,6 +36,6 @@
 ### 1. **MiDaS** (Multi-scale Deep Stereo Matching System)
 - https://pytorch.org/hub/intelisl_midas_v2/
 ### 2. **Neural Radiance Fields (NeRF)**
--
+- https://github.com/airalcorn2/pytorch-nerf?tab=readme-ov-file
 ### 3. **Pix2Pix**
 - 
