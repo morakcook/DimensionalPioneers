@@ -37,19 +37,22 @@
 - **설명**: 생성된 3d객체 파일을 웹이나 앱 화면에서 확인하는 로직을 사용합니다.
 - **이해**: 3d파일(.glb)을 웹 화면상에서 시각적으로 확인할수있게 도와주는 javascript library입니다.
 
+## 진행화면
 
-## 사용하는 모델 소스 예제 사이트
+
+
+## 사용하는 모델 및 라이센스 정의
 
 ### 1. ZERO123++
 - **원본 출처**: [ZERO123++ GitHub](https://github.com/SUDO-AI-3D/zero123plus?tab=readme-ov-file)
 - **라이센스**:
-  - **코드 라이센스**: Apache License 2.0
-  - **모델 가중치 라이센스**: CC-BY-NC 4.0
+  - **코드 라이센스**: [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+  - **모델 가중치 라이센스**: [CC-BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed.ko)
 - **사용 목적**: 1장의 2D 이미지로부터 6장의 다른 각도에서 본 이미지를 생성
 - **수정 및 통합 사항**: 원본 코드를 기반으로 6장의 이미지를 자동으로 생성하는 기능을 추가함.
 
 ### 2. DUSt3r
 - **원본 출처**: [DUSt3r GitHub](https://github.com/naver/dust3r)
-- **라이센스**: CC BY-NC-SA 4.0
+- **라이센스**: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko)
 - **사용 목적**: 생성된 6장의 이미지를 이용하여 3D 모델을 생성
 - **수정 및 통합 사항**: 원본 코드를 수정하여 3D 모델을 자동으로 생성하는 기능을 추가함.
