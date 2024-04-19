@@ -41,6 +41,17 @@
 
 <img width="80%" src="https://github.com/morakcook/DimensionalPioneers/blob/main/Reference/%EC%8B%A4%ED%96%89%ED%99%94%EB%A9%B4.gif"/>
 
+## 진행방법
+
+1. a
+2. a
+3. requirements.txt, requirements 설치
+4. a
+5. a
+6. a
+7. 
+
+
 ## 사용하는 모델 및 라이센스 정의
 
 ### 1. ZERO123++
