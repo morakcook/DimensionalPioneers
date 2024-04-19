@@ -1,0 +1,176 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+        <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+        <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>History Page</title>
+        <style>
+            /*      reset CSS       */
+            * {margin:0; padding:0; box-sizing:border-box;}
+            html, body {width:100%; height:100%; overflow:hidden; font-size:12pt; text-align:center; background:gray;}
+            img {border:0;}
+            #pageContainer {position:relative; width:95%; height:98%; margin:0.5% auto; text-align:left; background:#fff;}
+            #pageContainer > div {float:left; margin:0 0.1% 0.5%; padding:0.5em;}
+            h3 {background:rgb(85, 85, 150); margin:0 0 0.3em; line-height:2em; text-indent:0.5em; color:#ffffff;}
+
+                /*  Side Menu   */
+            a {display:inline-block; text-decoration:none;}
+
+            .menuBtnBox    {width:98%; height:40px; padding:0.5% 0 0; margin:auto;}
+            .menuBtn    {height:96%; cursor:pointer;}
+
+            .sideMenuBar    {position:absolute; width:200px; height:100%; padding:1em;
+                            background:#acacfc;}
+            .sideMenuBar li:first-of-type {height:50px; padding:10px; text-align:right; list-style-type:none;}
+            .sideMenuBar li {margin-left:1em;}
+            .sideMenuBar li a {font-weight:bold; color:#383866; line-height:2em;}
+
+            
+            /*  Custom CSS       */
+            .imgBoxResult {width:75%; height:95%; float:left;}
+            .imgBoxOrg {width:23%; height:40%; float:left;}
+                .imgViewer   {width:95%; height:90%; border:1px solid #cfcfcf; margin:auto;}
+
+            .btn    {margin:0 1em 0 0; float:right; padding:0.1em 0.5em;}
+
+            .dataHistory    {width:23%; border-collapse:collapse; margin:1em auto 0; float:left; list-style-type:none;}
+            .dataHistory li {border-bottom:1px solid rgb(85, 85, 150); padding:0.5em 1em;}
+            .dataHistory .title {text-align:center; background:rgb(85, 85, 150); color:#fff;}
+            .clickable {padding: 0.5em; /* 클릭 영역을 늘리는 padding 설정 */ cursor: pointer; /* 마우스 커서를 포인터로 변경하여 클릭 가능성을 나타냄 */}
+            .img2Dview {width:100%; max-width:100%; height:100%;}
+            #canvas3D  {
+            display:block;
+            width: 100%; /* resultViewer의 크기에 맞추기 위해 100% 설정 */
+            height: 100%; /* resultViewer의 크기에 맞추기 위해 100% 설정 */
+            margin:auto;
+            touch-action: none; /* 터치 이벤트 무시 */
+            }
+        </style>
+    </head>
+    <body>
+    <div id="pageContainer">
+        <ul class="sideMenuBar">
+            <li><img src="../static/images/icon_arrowLeft.png" class="menuBtn" /></li>
+            <li><a href="index_main">메인 페이지</a></li>
+            <li><a href="webpage_history">History</a></li>
+        </ul>
+        <p class="menuBtnBox">
+            <img src="../static/images/icon_arrowRight.png" class="menuBtn" />
+        </p>
+
+        <div class="imgBoxResult">
+            <h3>3D 변환결과 이미지</h3>
+            <div class="imgViewer">
+                <canvas id="canvas3D"></canvas>
+            </div>
+        </div>
+        <div class="imgBoxOrg">
+            <h3>원본 이미지</h3>
+            <div class="imgViewer">
+                <img class="img2Dview" id="img01"/>
+            </div>
+        </div>
+        <ul class="dataHistory">
+            <li class="title">이 름</li>
+            <!-- <li>abcdefg</li> -->
+            {% for item in log %}
+                <li class="clickable">{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    </body>
+    <script>
+        var scene, camera, renderer, controls;
+
+        $(function(){
+            $('.sideMenuBar').hide();
+
+            $('.menuBtn').click(function() {
+                $('.sideMenuBar').show('slide', {
+                    direction: 'left'
+                }, 1000); 
+            });
+
+            $('.sideMenuBar li img').click(function() {
+                $('.sideMenuBar').hide('slide', {
+                    direction: 'left'
+                }, 1000); 
+            });
+        });
+        
+        function load_origin_img(origin_img_path){
+            var img = document.getElementById("img01");
+            img.src = origin_img_path;
+        };
+
+        function load3DModel(glb_path){
+            scene = new THREE.Scene();
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.querySelector('#canvas3D'),
+                antialias:true
+            })
+            renderer.setSize(window.innerWidth*0.5, window.innerHeight);
+
+            camera = new THREE.PerspectiveCamera(30, 1);
+            camera.position.set(0,0,1);
+
+            scene.background = new THREE.Color('black');
+            let light = new THREE.DirectionalLight(0xffffff, 5);
+            light.position.set(1, 1, 1);
+            scene.add(light);
+            let light2 = new THREE.DirectionalLight(0xffffff, 5);
+            light2.position.set(-1, -1, -1);
+            scene.add(light2);
+
+            let loader = new THREE.GLTFLoader();
+            loader.load(glb_path, function(gltf){
+                scene.add(gltf.scene);
+                // OrbitControls 추가
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                // 카메라 컨트롤 업데이트
+                controls.update();
+                // 애니메이션 시작
+                animate();
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // OrbitControls 업데이트
+            controls.update();
+            // 렌더링
+            renderer.render(scene, camera);
+        }
+
+        document.querySelectorAll("#pageContainer > ul.dataHistory > li").forEach(row => {
+            row.addEventListener('click', () => {
+                var file_name = row.textContent.trim();
+                $.ajax({
+                    url: '/read_row',
+                    type: 'POST',
+                    data: {'file': file_name}, // 파일 이름을 JSON 형식으로 전달합니다.
+                    success: function(data) {
+                        console.log(data.origin_img_path)
+                        console.log(data.glb_path)
+                        if (data.glb_path) { 
+                            load_origin_img(data.origin_img_path);
+                            load3DModel(data.glb_path);
+                        } else {
+                            console.error('No path provided for the 3D model');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Upload failed: ' + textStatus + ' ' + errorThrown);
+                        alert('Error uploading image');
+                    }
+                });
+            });
+        });
+
+    </script>
+    </html>

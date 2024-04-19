@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <title>Main Page</title>
+    <style>
+        * {margin:0; padding:0; box-sizing:border-box;}
+        html, body {width:100%; height:100%; overflow:hidden; font-size:12pt; text-align:center; background:gray;}
+        img {border:0;}
+        #pageContainer {width:95%; height:98%; margin:0.5% auto; text-align:left; background:#fff;}
+        #pageContainer > div {float:left; margin:0.1%; padding:0.5em;}
+        h3 {background:rgb(85, 85, 150); margin:0 0 0.3em; line-height:2em; text-indent:0.5em; color:#ffffff;}
+
+        .imgInput {float:left; width:10%; height:35%;}
+        #preview {display:block; height:70%; margin:0.3em auto;}
+
+        .workingArea {float:left; width:68%; height:35%;}
+        #workingList {width:100%; height:85%; display:flex; justify-content:space-evenly;}
+        .img2Dview {width:12%; max-width:16%; height:80%;}
+
+        .imgOutput {width:99%; height:60%;}
+        #resultViewer  {display:block; width: 99%; height:90%; margin:auto; overflow: hidden; border:1px solid #cfcfcf;}
+        #canvas3D  {
+            display:block;
+            width: 100%; /* resultViewer의 크기에 맞추기 위해 100% 설정 */
+            height: 100%; /* resultViewer의 크기에 맞추기 위해 100% 설정 */
+            margin:auto;
+            touch-action: none; /* 터치 이벤트 무시 */
+        }
+        
+        .btn {margin:0 1em 0 0; float:right; padding:0.1em 0.5em;}
+
+
+        a {display:inline-block; text-decoration:none;}
+
+        .menuBtnBox    {width:98%; height:40px; padding:0.5% 0 0; margin:auto;}
+        .menuBtn    {height:96%; cursor:pointer;}
+
+        .sideMenuBar    {position:absolute; width:200px; height:100%; padding:1em;
+                         background:#acacfc;}
+        .sideMenuBar li:first-of-type {height:50px; padding:10px; text-align:right; list-style-type:none;}
+        .sideMenuBar li {margin-left:1em;}
+        .sideMenuBar li a {font-weight:bold; color:#383866; line-height:2em;}
+
+        .controllBox    {width:10%; padding:10em 0 0 !important; text-align:center;}
+        .controllBox a  {display:inline-block; width:90%; max-width:120px; margin:0.5em auto; font-size:0.9em; line-height:2em; color:#fff; text-align:center;
+                         border:1px solid #5858aa; background:#8686d4; border-radius:1em;}
+
+    </style>
+    <script>
+
+        var scene, camera, renderer, controls;
+
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                $('#preview').attr('src', "");
+            }
+        }
+
+        function load_Interim_deliverables(Interim_deliverables_url){
+            for(var i=1; i<=6; i++){
+                var img_url = Interim_deliverables_url + "/" + "output"+i+".png"
+                var img = document.getElementById("img0"+i)
+                img.src = img_url;
+            }
+        };
+
+        function load3DModel(output_file_path){
+            scene = new THREE.Scene();
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.querySelector('#canvas3D'),
+                antialias:true
+            })
+            renderer.setSize(window.innerWidth*0.5, window.innerHeight);
+
+            camera = new THREE.PerspectiveCamera(30, 1);
+            camera.position.set(0,0,1);
+
+            scene.background = new THREE.Color('black');
+            let light = new THREE.DirectionalLight(0xffffff, 5);
+            light.position.set(1, 1, 1);
+            scene.add(light);
+            let light2 = new THREE.DirectionalLight(0xffffff, 5);
+            light2.position.set(-1, -1, -1);
+            scene.add(light2);
+
+            let loader = new THREE.GLTFLoader();
+            loader.load(output_file_path, function(gltf){
+                scene.add(gltf.scene);
+                // OrbitControls 추가
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                // 카메라 컨트롤 업데이트
+                controls.update();
+                // 애니메이션 시작
+                animate();
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // OrbitControls 업데이트
+            controls.update();
+            // 렌더링
+            renderer.render(scene, camera);
+        }
+
+
+        function start() {
+            var fileInput = $('#imageInput')[0];
+            if (fileInput.files.length === 0) {
+                alert('Please select a file before uploading.');
+                return;
+            }
+            var formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            $.ajax({
+                url: '/start',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    if (data.output_file_path) {
+                        load_Interim_deliverables(data.Interim_deliverables);
+                        load3DModel(data.output_file_path);
+                    } else {
+                        console.error('No path provided for the 3D model');
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Upload failed: ' + textStatus + ' ' + errorThrown);
+                    alert('Error uploading image');
+                }
+            });
+        }
+
+        $(function(){
+            $('.sideMenuBar').hide();
+
+            $('.menuBtn').click(function() {
+                 $('.sideMenuBar').show('slide', {
+                     direction: 'left'
+                 }, 1000); 
+            });
+
+            $('.sideMenuBar li img').click(function() {
+                 $('.sideMenuBar').hide('slide', {
+                     direction: 'left'
+                 }, 1000); 
+            });
+        });
+
+
+        function download_image() {
+            $.ajax({
+                type: 'GET',
+                url: '/download',
+                success: function(response) {
+                    console.log(response)
+                    // 다운로드 링크를 클릭하여 파일 다운로드
+                    var link = document.createElement('a');
+                    link.href = response.url;
+                    link.download = 'file.glb'; // 다운로드될 파일 이름
+                    link.click();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error downloading file:', error);
+                }
+            });
+        }
+
+        // function download_image(){
+        //     const fileInput = $('#imageInput')[0];
+        //     if (fileInput.files.length === 0) {
+        //         alert('Please select a file before downloading.');
+        //         return;
+        //     }
+        //     const file = fileInput.files[0];
+        //     const fileName = file.name;
+        //     const base = fileName.split('.').slice(0, -1).join('.');
+        //     const newFileName = base + ".glb";
+        //     const blob = new Blob([file], { type: file.type });
+        //     const path = window.URL.createObjectURL(blob);
+        //     const link = document.createElement('a');
+        //     link.href = path;
+        //     link.download = newFileName;
+        //     document.body.appendChild(link);
+        //     link.click();
+        //     document.body.removeChild(link);
+        // }
+
+    </script>
+</head>
+<body> 
+    <div id="pageContainer">
+        <ul class="sideMenuBar">
+            <li><img src="../static/images/icon_arrowLeft.png" class="menuBtn" /></li>
+            <li><a href="index_main">메인 페이지</a></li>
+            <li><a href="webpage_history">History</a></li>
+        </ul>
+        <p class="menuBtnBox">
+            <img src="../static/images/icon_arrowRight.png" class="menuBtn" />
+        </p>
+
+        <div class="imgInput">
+            <h3>원본 이미지</h3>
+            <input type="file" id="imageInput" name="file" onchange="readURL(this);">
+            <img id="preview" alt="Image preview...">
+        </div>
+        <div class="controllBox">
+            <a href="#" onclick="start()" class="upBtn">Upload</a>
+            <a href="#" onclick="download_image()" class="downBtn">Download</a>
+        </div>
+
+        <div class="workingArea">
+            <h3>2D 이미지 리스트</h3>
+            <div id="workingList">
+                <img class="img2Dview" id="img01"/><img class="img2Dview" id="img02"/><img class="img2Dview" id="img03"/>
+                <img class="img2Dview" id="img04"/><img class="img2Dview" id="img05"/><img class="img2Dview" id="img06"/>
+            </div>
+        </div>
+        <div class="imgOutput">
+            <h3>3D 이미지</h3>
+            <div id="resultViewer">
+                <canvas id="canvas3D"></canvas>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
