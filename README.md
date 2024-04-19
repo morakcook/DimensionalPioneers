@@ -39,7 +39,7 @@
 
 ## 진행화면
 
-
+<img width="80%" src="https://github.com/morakcook/DimensionalPioneers/blob/main/Reference/%EC%8B%A4%ED%96%89%ED%99%94%EB%A9%B4.gif"/>
 
 ## 사용하는 모델 및 라이센스 정의
 
